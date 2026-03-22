@@ -50,5 +50,5 @@ You can view the live implementation here:**
 3. Click **Add to Cart** to see the product successfully transfer to the cart page.
 4. Scroll to the bottom to view the **Recommended Products** and **Custom Footer**.
 
-**Developer:** Suchitra  
+**Developer:** Sujithra  
 **Date:** March 22, 2026
