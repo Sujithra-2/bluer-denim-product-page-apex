@@ -1,0 +1,227 @@
+<style>
+  /* Base Layout */
+  .custom-product-page {
+    display: flex;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    gap: 50px;
+    font-family: 'Helvetica Neue', sans-serif;
+  }
+
+  /* Left Side: Images */
+  .product-media-gallery {
+    width: 60%;
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two images side by side like standard fashion sites */
+    gap: 15px;
+  }
+  .product-image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+  }
+  .product-image:hover {
+    transform: scale(1.02);
+  }
+
+  /* Right Side: Sticky Info */
+  .product-info-sidebar {
+    width: 40%;
+    position: sticky;
+    top: 40px;
+    height: fit-content;
+  }
+  .product-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .product-price {
+    font-size: 22px;
+    margin-bottom: 30px;
+    color: #333;
+  }
+
+  /* Buttons & Selectors */
+  .variant-selectors {
+    margin-bottom: 25px;
+  }
+  .variant-select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    margin-top: 8px;
+  }
+  .add-to-cart-btn {
+    width: 100%;
+    padding: 18px;
+    background-color: #000;
+    color: #fff;
+    font-size: 16px;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .add-to-cart-btn:hover {
+    background-color: #333;
+  }
+
+  /* Accordion */
+  .accordion-section {
+    margin-top: 40px;
+    border-top: 1px solid #eee;
+  }
+  .accordion-toggle {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 0;
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .accordion-content {
+    display: none;
+    padding-bottom: 20px;
+    color: #555;
+    line-height: 1.6;
+  }
+
+  /* Animations */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  /* Mobile Responsive */
+  @media (max-width: 768px) {
+    .custom-product-page { flex-direction: column; }
+    .product-media-gallery, .product-info-sidebar { width: 100%; position: static; }
+    .product-media-gallery { grid-template-columns: 1fr; }
+  }
+</style>
+
+
+
+
+<div class="custom-product-page fade-in-up">
+  
+  <div class="product-media-gallery">
+    {% for media in product.media %}
+      <div class="product-image-wrapper">
+        <img src="{{ media | img_url: 'master' }}" alt="{{ media.alt | escape }}" class="product-image">
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="product-info-sidebar">
+    <h1 class="product-title">{{ product.title }}</h1>
+    <p class="product-price">{{ product.price | money }}</p>
+
+    {% form 'product', product, id: 'add-to-cart-form' %}
+      <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+
+      {% unless product.has_only_default_variant %}
+        <div class="variant-selectors">
+          {% for option in product.options_with_values %}
+            <div class="option-group">
+              <label>{{ option.name }}</label>
+              <select class="variant-select" data-index="option{{ forloop.index }}">
+                {% for value in option.values %}
+                  <option value="{{ value | escape }}" {% if option.selected_value == value %}selected{% endif %}>
+                    {{ value }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          {% endfor %}
+        </div>
+      {% endunless %}
+
+      <div class="actions">
+        <button type="submit" class="add-to-cart-btn">Add to Cart</button>
+      </div>
+    {% endform %}
+
+    <div class="product-description accordion-section">
+      <button class="accordion-toggle">Description <span>+</span></button>
+      <div class="accordion-content">
+        {{ product.description }}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    
+    // 1. Accordion Logic
+    const accordionToggle = document.querySelector('.accordion-toggle');
+    const accordionContent = document.querySelector('.accordion-content');
+    
+    if(accordionToggle) {
+      accordionToggle.addEventListener('click', function() {
+        const isOpen = accordionContent.style.display === 'block';
+        accordionContent.style.display = isOpen ? 'none' : 'block';
+        this.querySelector('span').innerText = isOpen ? '+' : '-';
+      });
+    }
+
+    // 2. Variant Selection Logic (Updating the hidden ID for the cart)
+    const variantSelects = document.querySelectorAll('.variant-select');
+    const hiddenInput = document.querySelector('input[name="id"]');
+    
+    // You need a master list of variants passed from Liquid to JS
+    const productVariants = {{ product.variants | json }};
+
+    variantSelects.forEach(select => {
+      select.addEventListener('change', function() {
+        // Get currently selected options
+        let selectedOptions = Array.from(variantSelects).map(s => s.value);
+        
+        // Find the matching variant object
+        let matchedVariant = productVariants.find(variant => {
+          return selectedOptions.every((option, index) => variant.options[index] === option);
+        });
+
+        // Update the hidden input with the new variant ID
+        if (matchedVariant) {
+          hiddenInput.value = matchedVariant.id;
+          document.querySelector('.product-price').innerText = Shopify.formatMoney(matchedVariant.price);
+        }
+      });
+    });
+  });
+
+  // Basic Shopify format money helper
+  Shopify.formatMoney = function(cents) {
+    return '$' + (cents / 100).toFixed(2);
+  };
+</script>
+
+
+
+
+{% schema %}
+{
+  "name": "Main Product",
+  "settings": []
+}
+{% endschema %}
+
+
+
+

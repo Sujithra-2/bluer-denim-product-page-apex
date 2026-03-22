@@ -1,0 +1,20 @@
+.product-page { display: flex; gap: 40px; padding: 40px; }
+.product-gallery { width: 50%; }
+.gallery-img { width: 100%; margin-bottom: 10px; }
+.product-info { width: 50%; }
+
+.size-btn {
+  padding: 10px;
+  margin: 5px;
+  border: 1px solid black;
+  cursor: pointer;
+}
+
+.add-btn {
+  background: black;
+  color: white;
+  padding: 15px;
+  width: 100%;
+}
+
+.accordion-content { display: none; }

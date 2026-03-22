@@ -1,0 +1,15 @@
+<div style="text-align: center; font-family: sans-serif; padding: 50px;">
+  <h1 style="color: #2c3e50;">Welcome to {{ shop.name }}</h1>
+  <p>If you see a product title below, your dynamic data is working!</p>
+  
+  <hr style="width: 50px; margin: 20px auto;">
+
+  {% assign my_product = all_products.first %}
+  
+  {% if my_product %}
+    <h2>Product Title: <span style="color: #e67e22;">{{ my_product.title }}</span></h2>
+    <p>Price: {{ my_product.price | money }}</p>
+  {% else %}
+    <p style="color: red;">No products found. Go to "Products" in your admin and add one!</p>
+  {% endif %}
+</div>
