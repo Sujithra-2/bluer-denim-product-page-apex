@@ -111,9 +111,6 @@
   }
 </style>
 
-
-
-
 <div class="custom-product-page fade-in-up">
   
   <div class="product-media-gallery">
@@ -162,8 +159,31 @@
   </div>
 </div>
 
-
-
+<div style="max-width: 1400px; margin: 80px auto 20px; border-top: 1px solid #eee; padding-top: 50px;">
+  <h2 style="font-size: 22px; margin-bottom: 30px; font-weight: normal;">Recommended Products</h2>
+  
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+    {% assign count = 0 %}
+    {% paginate collections.all.products by 50 %}
+      {% for item in collections.all.products %}
+        {% if item.id != product.id and count < 4 and item.available %}
+          <div style="text-align: left;">
+            <a href="{{ item.url }}" style="text-decoration: none; color: inherit;">
+              <img src="{{ item.featured_image | img_url: '500x' }}" alt="{{ item.title | escape }}" style="width: 100%; height: 350px; object-fit: cover; background: #f4f4f4;">
+              <p style="margin: 15px 0 5px; font-size: 14px; color: #333;">{{ item.title }}</p>
+              <p style="margin: 0; font-size: 14px; color: #666;">{{ item.price | money }}</p>
+            </a>
+          </div>
+          {% assign count = count | plus: 1 %}
+        {% endif %}
+      {% endfor %}
+    {% endpaginate %}
+    
+    {% if count == 0 %}
+      <p style="color: red;">Products are still in Draft mode or not published to the Online Store channel!</p>
+    {% endif %}
+  </div>
+</div>
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {
@@ -212,16 +232,9 @@
   };
 </script>
 
-
-
-
 {% schema %}
 {
   "name": "Main Product",
   "settings": []
 }
 {% endschema %}
-
-
-
-
