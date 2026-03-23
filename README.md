@@ -6,6 +6,7 @@ This repository contains a custom-built Shopify theme developed as part of a Ful
 **##  Live Demo
 You can view the live implementation here:**
 **[View Live Product Page](https://bluer-store-2.myshopify.com/products/black-handwork-denim-dress)**
+view live project **store password** :  afialt
 
 ---
 
